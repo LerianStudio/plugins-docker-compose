@@ -4,7 +4,7 @@
 
 1. **Clone the Repository:**
 ```bash
-git clone https://github.com/LerianStudio/plugin-starters
+git clone https://github.com/LerianStudio/plugins-docker-compose.git
 ```
 
 2. **Go to the plugin directory:**
