@@ -14,9 +14,6 @@ services:
   plugin-crm:
     image: ghcr.io/lerianstudio/plugin-crm:latest
     restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
     env_file:
       - .env
     ports:
