@@ -1,0 +1,111 @@
+x-auth-redis-common:
+  &auth-redis-common
+  image: valkey/valkey:8.0.2
+  restart: always
+  env_file:
+    - auth.env
+  networks:
+    - plugin-auth-network
+
+services:
+  plugin-auth-casdoor-db:
+    container_name: plugin-auth-casdoor-db
+    image: postgres:latest
+    restart: always
+    env_file:
+      - auth.env
+    networks:
+      - plugin-auth-network
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    environment:
+      PGPORT: ${DB_PORT}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - ./init/casdoor-migrations/migrations/00_init.up.sql:/docker-entrypoint-initdb.d/00_init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -p ${DB_PORT}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  plugin-auth-casdoor-backend:
+    container_name: plugin-auth-casdoor-backend
+    image: casbin/casdoor:v1.943.0
+    restart: always
+    env_file:
+      - auth.env
+    ports:
+      - ${AUTHORIZER_PORT}:${AUTHORIZER_PORT}
+    volumes:
+      - ./init/casdoor/init_data.json:/init_data.json
+    depends_on:
+      plugin-auth-casdoor-db:
+        condition: service_healthy
+    networks:
+      - plugin-auth-network
+
+  plugin-auth-redis:
+    <<: *auth-redis-common
+    container_name: plugin-auth-redis
+    environment:
+      - REDIS_USER=${REDIS_USER}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}",  "--port", "${REDIS_PORT}"]
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - plugin-redis-data:/data
+
+  plugin-auth:
+    container_name: plugin-auth
+    image: ghcr.io/lerianstudio/plugin-auth:latest
+    restart: always
+    env_file:
+      - auth.env
+    ports:
+      - ${AUTH_PORT}:${AUTH_PORT}
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - plugin-auth-casdoor-backend
+      - plugin-auth-redis
+    networks:
+      - plugin-auth-network
+      - infra-network
+
+  plugin-identity:
+    container_name: plugin-identity
+    restart: always
+    image: ghcr.io/lerianstudio/plugin-identity:latest
+    env_file:
+      - identity.env
+    ports:
+      - ${IDENTITY_PORT}:${IDENTITY_PORT}
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - plugin-auth-casdoor-backend
+    networks:
+      - plugin-identity-network
+      - plugin-auth-network
+      - infra-network
+
+networks:
+  plugin-identity-network:
+    name: plugin-identity-network
+    driver: bridge
+  plugin-auth-network:
+    name: plugin-auth-network
+    external: true
+  infra-network:
+    name: infra-network
+    driver: bridge
+  
+volumes:
+  plugin-postgres-data:
+  plugin-grafana-data:
+  plugin-redis-data:

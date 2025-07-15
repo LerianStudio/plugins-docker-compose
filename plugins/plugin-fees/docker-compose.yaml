@@ -1,5 +1,5 @@
-x-plugin-crm-mongodb-common:
-  &plugin-crm-mongodb-common
+x-plugin-fees-mongodb-common:
+  &plugin-fees-mongodb-common
   image: mongo:latest
   restart: always
   healthcheck:
@@ -8,26 +8,30 @@ x-plugin-crm-mongodb-common:
     timeout: 5s
     retries: 5
   networks:
-    - plugin-crm-network
+    - plugin-fees-network
 
 services:
-  plugin-crm:
-    image: ghcr.io/lerianstudio/plugin-crm:latest
+  plugin-fees:
+    container_name: plugin-fees
     restart: always
+    image: ghcr.io/lerianstudio/plugin-fees:1.0.0
     env_file:
       - .env
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
     volumes:
       - .:/usr/src/app
+    depends_on:
+      - plugin-fees-mongodb
     networks:
-      - plugin-crm-network
+      - plugin-fees-network
       - plugin-auth-network
+      - onboarding-network
       - infra-network
 
-  plugin-crm-mongodb:
-    <<: *plugin-crm-mongodb-common
-    container_name: plugin-crm-mongodb
+  plugin-fees-mongodb:
+    <<: *plugin-fees-mongodb-common
+    container_name: plugin-fees-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
@@ -35,19 +39,21 @@ services:
     ports:
       - ${MONGO_PORT}:${MONGO_PORT}
     volumes:
-      - plugin-crm-mongodb-data:/data/db
+      - mongo-data:/data/db
 
 volumes:
-  plugin-crm-mongodb-data:
-  plugin-crm-grafana-data:
+  mongo-data:
 
 networks:
-  plugin-crm-network:
-    name: plugin-crm-network
+  plugin-fees-network:
+    name: plugin-fees-network
     driver: bridge
   plugin-auth-network:
-    name: plugin-auth-network
+    name:  plugin-auth-network
+    driver: bridge
+  onboarding-network:
+    name: onboarding-network
     driver: bridge
   infra-network:
     name: infra-network
-    driver: bridge
+    external: true
