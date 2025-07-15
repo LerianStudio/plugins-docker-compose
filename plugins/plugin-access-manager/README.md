@@ -13,7 +13,7 @@ cd plugins/plugin-access-manager
 ```
 3. **Run the Docker Compose File**
 ```bash
-docker compose up
+docker compose --env-file auth.env --env-file identity.env up
 ```
    
 5. **Access the API:**
