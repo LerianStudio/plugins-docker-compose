@@ -14,7 +14,7 @@ services:
   plugin-fees:
     container_name: plugin-fees
     restart: always
-    image: ghcr.io/lerianstudio/plugin-fees:1.0.0
+    image: ghcr.io/lerianstudio/plugin-fees:latest
     env_file:
       - .env
     ports:
