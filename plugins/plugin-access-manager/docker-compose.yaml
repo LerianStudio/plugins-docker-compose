@@ -25,7 +25,7 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
     volumes:
-      - ./init/casdoor-migrations/migrations/00_init.up.sql:/docker-entrypoint-initdb.d/00_init.sql
+      - ./init/casdoor-migrations/migrations/01_init.up.sql:/docker-entrypoint-initdb.d/01_init.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -p ${DB_PORT}" ]
       interval: 10s
@@ -34,7 +34,7 @@ services:
 
   plugin-auth-casdoor-backend:
     container_name: plugin-auth-casdoor-backend
-    image: casbin/casdoor:v1.943.0
+    image: ghcr.io/lerianstudio/casdoor:2.1.1
     restart: always
     env_file:
       - auth.env
@@ -104,7 +104,7 @@ networks:
   infra-network:
     name: infra-network
     driver: bridge
-  
+
 volumes:
   plugin-postgres-data:
   plugin-grafana-data:
