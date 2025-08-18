@@ -67,7 +67,7 @@ services:
     env_file:
       - auth.env
     ports:
-      - ${AUTH_PORT}:${AUTH_PORT}
+       - ${SERVER_PORT}:${SERVER_PORT}
     volumes:
       - .:/usr/src/app
     depends_on:
@@ -100,7 +100,7 @@ networks:
     driver: bridge
   plugin-auth-network:
     name: plugin-auth-network
-    external: true
+    external: false
   infra-network:
     name: infra-network
     driver: bridge
