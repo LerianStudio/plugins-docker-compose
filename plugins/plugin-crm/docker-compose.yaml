@@ -25,6 +25,25 @@ services:
       - plugin-auth-network
       - infra-network
 
+  plugin-crm-ui:
+    container_name: plugin-crm-ui
+    image: ghcr.io/lerianstudio/plugin-crm-frontend:latest
+    restart: always
+    ports:
+      - '8082:8082'
+    env_file:
+      - ui.env
+    healthcheck:
+      test:
+        ['CMD', 'curl', '-f', 'http://localhost:8082/api/admin/health/ready']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - plugin-auth-network
+      - infra-network
+      - proxy-network
+
   plugin-crm-mongodb:
     <<: *plugin-crm-mongodb-common
     container_name: plugin-crm-mongodb
@@ -42,6 +61,9 @@ volumes:
   plugin-crm-grafana-data:
 
 networks:
+  console-network:
+    name: console-network
+    driver: bridge
   plugin-crm-network:
     name: plugin-crm-network
     driver: bridge
@@ -51,3 +73,6 @@ networks:
   infra-network:
     name: infra-network
     driver: bridge
+  proxy-network:
+    name: proxy-network
+    external: true

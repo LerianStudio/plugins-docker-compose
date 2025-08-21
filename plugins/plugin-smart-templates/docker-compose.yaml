@@ -147,8 +147,26 @@ services:
       - .:/usr/src/worker
     networks:
       - plugin-smart-templates-infra-network
-      - infra-network
       - plugin-fees-network
+
+  plugin-smart-templates-ui:
+    container_name: plugin-smart-templates-ui
+    image: ghcr.io/lerianstudio/plugin-smart-templates-frontend:latest
+    restart: always
+    ports:
+      - 8083:8083
+    env_file:
+      - ui.env
+    healthcheck:
+      test:
+        ['CMD', 'curl', '-f', 'http://localhost:8083/api/admin/health/ready']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - console-network
+      - infra-network
+      - proxy-network
 
 volumes:
   plugin-smart-templates-mongodb-data:
@@ -156,15 +174,24 @@ volumes:
   plugin-smart-templates-redis-data:
 
 networks:
+  plugin-smart-templates-manager-network:
+    name: plugin-smart-templates-manager-network
+    driver: bridge
   plugin-smart-templates-infra-network:
     name: plugin-smart-templates-infra-network
     driver: bridge
-  infra-network:
-    name: infra-network
-    external: true
-  plugin-fees-network:
+  console-network:
+    name: console-network
     driver: bridge
-  plugin-smart-templates-manager-network:
+  plugin-fees-network:
+    name: plugin-fees-network
     driver: bridge
   plugin-auth-network:
+    name: plugin-auth-network
     driver: bridge
+  infra-network:
+    name: infra-network
+    driver: bridge
+  proxy-network:
+    name: proxy-network
+    external: true

@@ -7,6 +7,10 @@ A license is a key that authorizes access to Lerian features or services under s
 
 See [Lerian Documentation](https://docs.lerian.studio/reference/lerians-license)
 
+## Console Nginx
+
+See [Console Nginx Documentation](plugins/console-nginx/README.MD)
+
 ## Plugins
 
 ### Plugin Access Manager
@@ -24,3 +28,4 @@ See [Plugin Fees Documentation](plugins/plugin-fees/README.md)
 ### Plugin Smart Templates
 
 See [Plugin Smart Templates Documentation](plugins/plugin-smart-templates/README.md)
+
