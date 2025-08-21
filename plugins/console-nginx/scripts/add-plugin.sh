@@ -72,7 +72,7 @@ fi
 
 
 # Waits for NGINX to reload and the plugin to respond
-PLUGIN_ROUTE="http://localhost:8080/${PLUGIN_NAME}/"
+PLUGIN_ROUTE="http://localhost/${PLUGIN_NAME}/"
 log info "Waiting for the plugin to respond at $PLUGIN_ROUTE ..."
 for i in {1..30}; do
   HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" "$PLUGIN_ROUTE")
@@ -93,7 +93,7 @@ done
 log info "Registering plugin in the main console via API..."
 
 curl -s -X POST \
-  http://localhost:8080/api/plugin/manifest/register/ \
+  http://localhost/api/plugin/manifest/register/ \
   -H "Content-Type: application/json" \
   -d "{\"host\": \"${PLUGIN_NAME}\"}"
 
