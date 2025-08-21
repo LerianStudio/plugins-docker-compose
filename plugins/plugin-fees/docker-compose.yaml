@@ -26,7 +26,6 @@ services:
     networks:
       - plugin-fees-network
       - plugin-auth-network
-      - onboarding-network
       - infra-network
 
   plugin-fees-mongodb:
@@ -41,19 +40,43 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  plugin-fees-ui:
+    container_name: plugin-fees-ui
+    image: ghcr.io/lerianstudio/plugin-fees-frontend:latest
+    restart: always
+    ports:
+      - '8084:8084'
+    env_file:
+      - ui.env
+    healthcheck:
+      test:
+        ['CMD', 'curl', '-f', 'http://localhost:8084/api/admin/health/ready']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - console-network
+      - plugin-auth-network
+      - infra-network
+      - proxy-network
+      - plugin-fees-network
+
 volumes:
   mongo-data:
 
 networks:
+  console-network:
+    name: console-network
+    driver: bridge
   plugin-fees-network:
     name: plugin-fees-network
     driver: bridge
   plugin-auth-network:
-    name:  plugin-auth-network
-    driver: bridge
-  onboarding-network:
-    name: onboarding-network
+    name: plugin-auth-network
     driver: bridge
   infra-network:
     name: infra-network
+    driver: bridge
+  proxy-network:
+    name: proxy-network
     external: true
